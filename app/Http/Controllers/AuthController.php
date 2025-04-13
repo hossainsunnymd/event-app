@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -13,14 +14,14 @@ class AuthController extends Controller
             $validation=Validator::make($request->all(),[
                 'name' => 'required',
                 'email' => 'required|email|unique:users',
-                'password' => 'required',
+                'password' => 'required|confirmed|min:8',
             ]);
 
             if($validation->fails()){
                 return response()->json([
                     'status'=>false,
                     'message' => $validation->errors()
-                ], 401);
+                ]);
             }
 
             $user = User::create([
@@ -31,8 +32,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'status'=>true,
-                'message' => 'User created successfully',
-                'data' => $user
+                'message' => 'User Registration successfully',
             ], 201);
     }
 
@@ -65,7 +65,7 @@ class AuthController extends Controller
         return response()->json([
             'status'=>true,
             'message' => 'User logged in successfully',
-            'data' => $user,
+            'data' => new UserResource($user),
             'token' => $token
         ]);
     }
